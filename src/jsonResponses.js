@@ -1,3 +1,4 @@
+const qs = require('querystring');
 // function to send a json object
 const respondJSON = (request, response, status, object) => {
   // set status code and content type (application/json)
@@ -10,38 +11,73 @@ const respondJSON = (request, response, status, object) => {
   response.end();
 };
 
-const info1 = (request, response) => {
-  const responseJSON = {
+var data=[
+  {
     message: 'Success',
     name: 'Joe',
     address: '1 street RD City 00000',
-  };
-  console.log('responseJSON');
-  // send our json with a success status code
-  respondJSON(request, response, 200, responseJSON);
-};
-
-const info2 = (request, response) => {
-  const responseJSON = {
+    phoneNumber: '(000) 000-0000',
+  },
+  {
     message: 'Success',
     name: 'Bob',
     address: '1 road RD Town 11111',
-  };
-  console.log('responseJSON');
-  // send our json with a success status code
-  respondJSON(request, response, 200, responseJSON);
-};
-
-const info3 = (request, response) => {
-  const responseJSON = {
+    phoneNumber: '(111) 111-1111',
+  },
+  {
     message: 'Success',
     name: 'Fred',
     address: '1 Lane RD Hamlet 33333',
-  };
-  console.log('responseJSON');
+    phoneNumber: '(222) 222-2222',
+  }
+]
+
+const getinfo = (request, response, params) => {
+  console.log(params);
+  if(!params.index || !(parseInt(params.index) || parseInt(params.index)==0) || parseInt(params.index) >= data.length || parseInt(params.index) < 0) {
+    const responseJSON = {
+      message: 'Index is either missing or invalid',
+      id: 'badRequest'
+    }
+    return respondJSON(request, response, 400, responseJSON);
+  } 
+  const responseJSON = data[parseInt(params.index)]; 
   // send our json with a success status code
   respondJSON(request, response, 200, responseJSON);
-};
+}
+
+const addInfo = (request, response) => {
+  let requestBody = '';
+  let results;
+  request.on('data', (data) => {
+    requestBody += data;
+  });
+
+  request.on('end', () => {
+    results = qs.parse(requestBody);
+    console.log(results);
+    const responseJSON = {
+      message: 'Invalid Input',
+    };
+      // if the request does not contain a valid=true query parameter
+    if (results.name && results.address && results.phoneNumber) {
+      for (let x = 1; x < data.length; x++) {
+        if (data[x].name === results.name) {
+          data[x].address = results.address;
+          data[x].phoneNumber = results.phoneNumber
+          responseJSON.message = '';
+          console.log(data);
+          return respondJSON(request, response, 204, responseJSON, 'application/json');
+        }
+      }
+      responseJSON.message = 'Success';
+      data.push({ message: 'Success', name: results.name, address: results.address, phoneNumber: results.phoneNumber });
+      console.log(data);
+      return respondJSON(request, response, 201, responseJSON, 'application/json');
+    }
+    return respondJSON(request, response, 400, responseJSON, 'application/json');
+  });
+}
 
 // function to show a success status code
 const success = (request, response) => {
@@ -94,7 +130,6 @@ module.exports = {
   success,
   badRequest,
   notFound,
-  info1,
-  info2,
-  info3,
+  getinfo,
+  addInfo,
 };

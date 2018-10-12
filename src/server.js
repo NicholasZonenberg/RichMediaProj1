@@ -13,9 +13,8 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 // key:value object to look up URL routes to specific functions
 const urlStruct = {
   '/': htmlHandler.getIndex,
-  '/info1': jsonHandler.info1,
-  '/info2': jsonHandler.info2,
-  '/info3': jsonHandler.info3,
+  '/getinfo': jsonHandler.getinfo,
+  '/addInfo': jsonHandler.addInfo,
   '/badRequest': jsonHandler.badRequest,
   notFound: jsonHandler.notFound,
 };

@@ -27,7 +27,9 @@
   </style>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
   <script type="text/babel">
+    var index = 3;
     //function to handle our xhr response
     const handleResponse = (xhr) => {
       //grab the content section
@@ -39,9 +41,11 @@
       //check the xhr status code and handle accordingly
       switch(xhr.status) {
         case 200: //success
-          content.innerHTML = '<p id="Name"></p><p id="Adress"></p>';
+          //displays the data from the entry
+          content.innerHTML = '<p id="Name"></p><p id="Adress"></p><p id="phone"></p>';
           document.getElementById('Name').innerHTML=obj.name;
           document.getElementById('Adress').innerHTML=obj.address;
+          document.getElementById('phone').innerHTML=obj.phoneNumber
           break;
         case 400: //bad request 
           content.innerHTML = `<b>Bad Request</b>`;
@@ -73,21 +77,54 @@
       xhr.send();
     };
 
+    // submits the form without leaving the page
+    function SubForm (){
+      console.log('submitted')
+      $.ajax({
+          url:'/addInfo',
+          type:'post',
+          data:$('#nameForm').serialize(),
+          statusCode:{
+            201: function(){
+              // gets an independent variable
+              var tempInt=0;
+              for (var x = 0; x <= index; x++){
+                tempInt=x;
+              }
+              // creates the button that will be used to access this entry
+              var button = document.createElement("button");
+              button.innerHTML=document.getElementById('nameField').value;
+              button.setAttribute("id", 'info'+tempInt);
+              const tempFunc = () => sendAjax('/getinfo?index='+tempInt);
+              document.getElementById("top").appendChild(button);
+              const tempQuery = document.querySelector('#info'+tempInt);
+              tempQuery.addEventListener('click', tempFunc);
+              index++;
+            }
+          }
+      });
+    }
+
+
     //initialization function
     const init = () => {
-      const successButton = document.querySelector("#info1");
-      const badRequestButton = document.querySelector("#info2");
-      const notFoundButton = document.querySelector("#info3");
+      // makes the three initial entries
+      const successButton = document.querySelector("#info0");
+      const badRequestButton = document.querySelector("#info1");
+      const notFoundButton = document.querySelector("#info2");
+      // sets up the submit button
+      const submitButton = document.querySelector("#submit");
       
       //functions to call sendAjax for us with the correct parameters
-      const success = () => sendAjax('/info1');
-      const badRequest = () => sendAjax('/info2');
-      const notFound = () => sendAjax('/info3');
+      const success = () => sendAjax('/getinfo?index=0');
+      const badRequest = () => sendAjax('/getinfo?index=1');
+      const notFound = () => sendAjax('/getinfo?index=2');
       
       //attach the correct functions to the correct events
       successButton.addEventListener('click', success);
       badRequestButton.addEventListener('click', badRequest);
       notFoundButton.addEventListener('click', notFound);
+      submitButton.addEventListener('click',SubForm);
     };
 
     window.onload = init;
@@ -97,15 +134,20 @@
 <body>
   <section id="top">
     <h3>White Pages</h3>
-    <p>
-      <button id="info1">person 1</button>
-    </p>
-    <p>
-      <button id="info2">person 2</button>
-    </p>
-    <p>
-      <button id="info3">person 3</button>
-    </p>
+    <button id="info0">Joe</button>
+    <button id="info1">Bob</button>
+    <button id="info2">Fred</button>
+  </section>
+  <section id='controls'>
+    <form id="nameForm" action="/addInfo" method="post">
+      <label for="name">Name: </label>
+      <input id="nameField" type="text" name="name" />
+      <label for="address">Address: </label>
+      <input id="ageField" type="text" name="address"/>
+      <label for="phoneNumber">Phone Number: </label>
+      <input id="ageField" type="text" name="phoneNumber"/>
+      <button type="button" id="submit">Submit</button>
+    </form>
   </section>
   <section id="content">
   </section>
