@@ -11,7 +11,7 @@ const respondJSON = (request, response, status, object) => {
   response.end();
 };
 
-var data=[
+const data = [
   {
     message: 'Success',
     name: 'Joe',
@@ -29,28 +29,29 @@ var data=[
     name: 'Fred',
     address: '1 Lane RD Hamlet 33333',
     phoneNumber: '(222) 222-2222',
-  }
-]
+  },
+];
 
 const getinfo = (request, response, params) => {
   console.log(params);
-  if(!params.index || !(parseInt(params.index) || parseInt(params.index)==0) || parseInt(params.index) >= data.length || parseInt(params.index) < 0) {
+  if (!params.index || !(parseInt(params.index, 10) || parseInt(params.index, 10) === 0) ||
+  parseInt(params.index, 10) >= data.length || parseInt(params.index, 10) < 0) {
     const responseJSON = {
       message: 'Index is either missing or invalid',
-      id: 'badRequest'
-    }
+      id: 'badRequest',
+    };
     return respondJSON(request, response, 400, responseJSON);
-  } 
-  const responseJSON = data[parseInt(params.index)]; 
+  }
+  const responseJSON = data[parseInt(params.index, 10)];
   // send our json with a success status code
-  respondJSON(request, response, 200, responseJSON);
-}
+  return respondJSON(request, response, 200, responseJSON);
+};
 
 const addInfo = (request, response) => {
   let requestBody = '';
   let results;
-  request.on('data', (data) => {
-    requestBody += data;
+  request.on('data', (temp) => {
+    requestBody += temp;
   });
 
   request.on('end', () => {
@@ -64,7 +65,7 @@ const addInfo = (request, response) => {
       for (let x = 1; x < data.length; x++) {
         if (data[x].name === results.name) {
           data[x].address = results.address;
-          data[x].phoneNumber = results.phoneNumber
+          data[x].phoneNumber = results.phoneNumber;
           responseJSON.message = '';
           console.log(data);
           return respondJSON(request, response, 204, responseJSON, 'application/json');
@@ -77,7 +78,7 @@ const addInfo = (request, response) => {
     }
     return respondJSON(request, response, 400, responseJSON, 'application/json');
   });
-}
+};
 
 // function to show a success status code
 const success = (request, response) => {

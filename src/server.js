@@ -14,7 +14,6 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 const urlStruct = {
   '/': htmlHandler.getIndex,
   '/style.css': htmlHandler.getCss,
-  '/scripts.js': htmlHandler.getScripts,
   '/getinfo': jsonHandler.getinfo,
   '/addInfo': jsonHandler.addInfo,
   '/badRequest': jsonHandler.badRequest,
