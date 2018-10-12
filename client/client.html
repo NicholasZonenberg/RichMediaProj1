@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Our simple HTTP server</title>
+  <style>
+    html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    #top {
+        text-align: center;
+        margin: 0 auto;
+    }
+    
+    #top h1 {
+      font-size: 2em;
+    }
+    
+    #content {
+      margin-top: 100px;
+      font-size: 2em;
+      text-align: center;
+    }
+  </style>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
+  <script type="text/babel">
+    //function to handle our xhr response
+    const handleResponse = (xhr) => {
+      //grab the content section
+      const content = document.querySelector("#content");
+      
+      ///parse the response text into a JSON object
+      const obj = JSON.parse(xhr.response);
+      
+      //check the xhr status code and handle accordingly
+      switch(xhr.status) {
+        case 200: //success
+          content.innerHTML = '<p id="Name"></p><p id="Adress"></p>';
+          document.getElementById('Name').innerHTML=obj.name;
+          document.getElementById('Adress').innerHTML=obj.address;
+          break;
+        case 400: //bad request 
+          content.innerHTML = `<b>Bad Request</b>`;
+          break;
+        case 404: //not found (requested resource does not exist)
+          content.innerHTML = `<b>Resource Not Found</b>`;
+          break;
+        default: //default other errors we are not handling in this example
+          content.innerHTML = `Error code not implemented by client.`;
+          break;
+      }
+    };
+    
+    //function to send ajax
+    const sendAjax = (url) => {
+      //create a new xhr (ajax) request. 
+      //Remember that these are ASYNCHRONOUS
+      const xhr = new XMLHttpRequest();
+      //set the xhr to a GET request to a certain URL
+      xhr.open('GET', url);
+      //Set the accept headers to the desired response mime type
+      //Server does NOT have to support this. It is a gentle request.
+      xhr.setRequestHeader ("Accept", 'application/json');
+
+      //When the xhr loads, call handleResponse and pass the xhr object
+      xhr.onload = () => handleResponse(xhr);
+
+      //send our ajax request to the server
+      xhr.send();
+    };
+
+    //initialization function
+    const init = () => {
+      const successButton = document.querySelector("#info1");
+      const badRequestButton = document.querySelector("#info2");
+      const notFoundButton = document.querySelector("#info3");
+      
+      //functions to call sendAjax for us with the correct parameters
+      const success = () => sendAjax('/info1');
+      const badRequest = () => sendAjax('/info2');
+      const notFound = () => sendAjax('/info3');
+      
+      //attach the correct functions to the correct events
+      successButton.addEventListener('click', success);
+      badRequestButton.addEventListener('click', badRequest);
+      notFoundButton.addEventListener('click', notFound);
+    };
+
+    window.onload = init;
+
+  </script>
+</head>
+<body>
+  <section id="top">
+    <h3>White Pages</h3>
+    <p>
+      <button id="info1">person 1</button>
+    </p>
+    <p>
+      <button id="info2">person 2</button>
+    </p>
+    <p>
+      <button id="info3">person 3</button>
+    </p>
+  </section>
+  <section id="content">
+  </section>
+</body>
+</html>
